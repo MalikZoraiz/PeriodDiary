@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context=".SymptomsActivity">
+
+    <ImageView
+        android:id="@+id/back_arrow_symptoms"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/symptoms_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Let's create the perfect experience for you!"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/back_arrow_symptoms" />
+
+    <TextView
+        android:id="@+id/symptoms_subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="16dp"
+        android:text="Select the most frequent symptoms during your cycle. This helps the app identify patterns and predict how you'll feel."
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/symptoms_title" />
+
+    <GridLayout
+        android:id="@+id/symptoms_grid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:columnCount="3"
+        android:rowCount="2"
+        android:useDefaultMargins="true"
+        android:alignmentMode="alignMargins"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/symptoms_subtitle">
+
+        <!-- Abdominal Cramps -->
+        <LinearLayout
+            android:id="@+id/symptom_cramps"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <FrameLayout
+                android:id="@+id/symptom_cramps_container"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:background="@drawable/symptom_item_background">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/abdominal_cramps"/>
+            </FrameLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="Abdominal cramps"/>
+        </LinearLayout>
+
+        <!-- Headache -->
+        <LinearLayout
+            android:id="@+id/symptom_headache"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <FrameLayout
+                android:id="@+id/symptom_headache_container"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:background="@drawable/symptom_item_background">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/headache"/>
+            </FrameLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="Headache"/>
+        </LinearLayout>
+
+        <!-- Fatigue -->
+        <LinearLayout
+            android:id="@+id/symptom_fatigue"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <FrameLayout
+                android:id="@+id/symptom_fatigue_container"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:background="@drawable/symptom_item_background">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/fatiques"/>
+            </FrameLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="Fatigue"/>
+        </LinearLayout>
+
+        <!-- Cravings -->
+        <LinearLayout
+            android:id="@+id/symptom_cravings"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <FrameLayout
+                android:id="@+id/symptom_cravings_container"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:background="@drawable/symptom_item_background">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/cravings"/>
+            </FrameLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="Cravings"/>
+        </LinearLayout>
+
+        <!-- Bloating -->
+        <LinearLayout
+            android:id="@+id/symptom_bloating"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <FrameLayout
+                android:id="@+id/symptom_bloating_container"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:background="@drawable/symptom_item_background">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/bloatings"/>
+            </FrameLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="Bloating"/>
+        </LinearLayout>
+
+        <!-- No Symptoms -->
+        <LinearLayout
+            android:id="@+id/symptom_no_symptoms"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <FrameLayout
+                android:id="@+id/symptom_no_symptoms_container"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:background="@drawable/symptom_item_background">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/no_symptoms"/>
+            </FrameLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="No symptoms"/>
+        </LinearLayout>
+
+    </GridLayout>
+
+    <TextView
+        android:id="@+id/step_text_symptoms"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Step 5 out of 7"
+        app:layout_constraintBottom_toTopOf="@id/progress_bar_symptoms"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar_symptoms"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
+        android:max="7"
+        android:progress="5"
+        app:layout_constraintBottom_toTopOf="@id/skip_button_symptoms"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/skip_button_symptoms"
+        style="@style/OutlinedPinkButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="Skip"
+        app:layout_constraintTop_toTopOf="@id/confirm_button_symptoms"
+        app:layout_constraintBottom_toBottomOf="@id/confirm_button_symptoms"
+        app:layout_constraintEnd_toStartOf="@id/confirm_button_symptoms"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/confirm_button_symptoms"
+        style="@style/LightPinkButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="Confirm"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/skip_button_symptoms" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
