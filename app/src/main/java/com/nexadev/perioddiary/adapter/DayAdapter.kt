@@ -3,6 +3,7 @@ package com.nexadev.perioddiary.adapter
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -16,7 +17,8 @@ class DayAdapter(
     private val monthCalendar: Calendar,
     private val selectedDates: List<Calendar>,
     private val selectionEnabled: Boolean,
-    private val showPredictions: Boolean, // New flag
+    private val showPredictions: Boolean,
+    private val isHorizontal: Boolean,
     private val onDateSelected: (Calendar) -> Unit
 ) : RecyclerView.Adapter<DayAdapter.DayViewHolder>() {
 
@@ -59,9 +61,9 @@ class DayAdapter(
             var predictions = 0
 
             var predictedStartDate = earliestDate.clone() as Calendar
-            predictedStartDate.add(Calendar.DAY_OF_MONTH, -cycleLength)
+            predictedStartDate.add(Calendar.DAY_OF_MONTH, cycleLength)
 
-            while (predictedStartDate.after(Calendar.getInstance().apply { set(2000, 0, 1) }) && predictions < 4) {
+            while (predictedStartDate.after(Calendar.getInstance().apply { set(2020, 0, 1) })) {
                 if (predictedStartDate.get(Calendar.MONTH) == monthCalendar.get(Calendar.MONTH) && predictedStartDate.get(Calendar.YEAR) == monthCalendar.get(Calendar.YEAR)) {
                     val startDay = predictedStartDate.get(Calendar.DAY_OF_MONTH)
                     val startIndex = days.indexOf(startDay.toString())
@@ -74,8 +76,9 @@ class DayAdapter(
                         }
                     }
                 }
-                predictedStartDate.add(Calendar.DAY_OF_MONTH, -cycleLength)
+                predictedStartDate.add(Calendar.DAY_OF_MONTH, cycleLength)
                 predictions++
+                if(predictions >= 4) break
             }
         }
     }
@@ -86,7 +89,14 @@ class DayAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayViewHolder {
         val tv = TextView(parent.context)
-        tv.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 120)
+        val size = if (isHorizontal) {
+            val displayMetrics = DisplayMetrics()
+            (parent.context as android.app.Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
+            displayMetrics.widthPixels / 9
+        } else {
+            120
+        }
+        tv.layoutParams = ViewGroup.LayoutParams(size, size)
         tv.gravity = android.view.Gravity.CENTER
         tv.setTextColor(Color.BLACK)
         tv.textSize = 14f
@@ -105,33 +115,28 @@ class DayAdapter(
             holder.tvDay.setTextColor(Color.BLACK)
             holder.tvDay.typeface = Typeface.DEFAULT
 
-            val thisMonth = monthCalendar.get(Calendar.MONTH)
-            val thisYear = monthCalendar.get(Calendar.YEAR)
+            val dayCalendar = monthCalendar.clone() as Calendar
+            dayCalendar.set(Calendar.DAY_OF_MONTH, dayInt)
 
-            when {
-                position in selectedPositions -> {
-                    holder.tvDay.setBackgroundResource(R.drawable.calendar_day_background)
-                    holder.tvDay.isSelected = true
-                    holder.tvDay.setTextColor(Color.WHITE)
-                }
-                position in predictedPositions -> {
-                    holder.tvDay.setBackgroundResource(R.drawable.predicted_day_background)
-                }
-                thisYear == currentYear && thisMonth == currentMonth && dayInt == currentDay -> {
-                    holder.tvDay.setTextColor(ContextCompat.getColor(context, R.color.pink))
-                    holder.tvDay.typeface = Typeface.DEFAULT_BOLD
-                }
-                else -> {
-                    holder.tvDay.setBackgroundResource(R.drawable.calendar_day_background)
-                    holder.tvDay.isSelected = false
-                }
+            val isSelected = selectedDates.any { it.get(Calendar.YEAR) == dayCalendar.get(Calendar.YEAR) && it.get(Calendar.DAY_OF_YEAR) == dayCalendar.get(Calendar.DAY_OF_YEAR) }
+
+            if (isSelected) {
+                holder.tvDay.setBackgroundResource(R.drawable.calendar_day_background)
+                holder.tvDay.isSelected = true
+                holder.tvDay.setTextColor(Color.WHITE)
+            } else if (position in predictedPositions) {
+                holder.tvDay.setBackgroundResource(R.drawable.predicted_day_background)
+            } else if (monthCalendar.get(Calendar.YEAR) == currentYear && monthCalendar.get(Calendar.MONTH) == currentMonth && dayInt == currentDay) {
+                holder.tvDay.setTextColor(ContextCompat.getColor(context, R.color.pink))
+                holder.tvDay.typeface = Typeface.DEFAULT_BOLD
+            } else {
+                holder.tvDay.setBackgroundResource(R.drawable.calendar_day_background)
+                holder.tvDay.isSelected = false
             }
 
             if (selectionEnabled) {
                 holder.itemView.setOnClickListener {
-                    val clickedCalendar = monthCalendar.clone() as Calendar
-                    clickedCalendar.set(Calendar.DAY_OF_MONTH, dayInt)
-                    onDateSelected(clickedCalendar)
+                    onDateSelected(dayCalendar)
                 }
             } else {
                 holder.itemView.setOnClickListener(null)

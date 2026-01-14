@@ -12,7 +12,8 @@ abstract class BaseCalendarActivity : AppCompatActivity() {
         recyclerView: RecyclerView,
         selectedDates: List<Calendar>,
         selectionEnabled: Boolean,
-        showPredictions: Boolean, // New flag to control prediction visibility
+        showPredictions: Boolean,
+        isHorizontal: Boolean, // This flag is now correctly used
         onDateSelected: (Calendar) -> Unit
     ) {
         val months = mutableListOf<Calendar>()
@@ -25,10 +26,18 @@ abstract class BaseCalendarActivity : AppCompatActivity() {
             calendar.add(Calendar.MONTH, 1)
         }
 
-        val adapter = MonthAdapter(this, months, selectedDates, selectionEnabled, showPredictions, onDateSelected)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        val adapter = MonthAdapter(this, months, selectedDates, selectionEnabled, showPredictions, isHorizontal, onDateSelected)
+        
+        val layoutManager = if (isHorizontal) {
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        } else {
+            LinearLayoutManager(this)
+        }
+        recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
-        recyclerView.scrollToPosition(months.size - 1)
+        if (!isHorizontal) {
+            recyclerView.scrollToPosition(months.size - 1)
+        }
     }
 }

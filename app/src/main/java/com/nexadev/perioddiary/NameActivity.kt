@@ -5,7 +5,11 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.nexadev.perioddiary.data.database.AppDatabase
+import com.nexadev.perioddiary.data.database.User
 import com.nexadev.perioddiary.databinding.ActivityNameBinding
+import kotlinx.coroutines.launch
 
 class NameActivity : AppCompatActivity() {
 
@@ -29,12 +33,18 @@ class NameActivity : AppCompatActivity() {
         })
 
         binding.confirmButton.setOnClickListener {
-            val intent = Intent(this, GoalActivity::class.java)
-            startActivity(intent)
+            val name = binding.firstNameEditText.text.toString()
+            if (name.isNotEmpty()) {
+                lifecycleScope.launch {
+                    val userDao = AppDatabase.getDatabase(applicationContext).userDao()
+                    userDao.insertUser(User(name = name))
+                }
+            }
+            startActivity(Intent(this, GoalActivity::class.java))
         }
+
         binding.skipButton.setOnClickListener {
-            val intent = Intent(this, GoalActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, GoalActivity::class.java))
         }
 
         binding.backArrow.setOnClickListener {

@@ -16,7 +16,8 @@ class MonthAdapter(
     private val months: List<Calendar>,
     private val selectedDates: List<Calendar>,
     private val selectionEnabled: Boolean,
-    private val showPredictions: Boolean, // New flag
+    private val showPredictions: Boolean,
+    private val isHorizontal: Boolean,
     private val onDateSelected: (Calendar) -> Unit
 ) : RecyclerView.Adapter<MonthAdapter.MonthViewHolder>() {
 
@@ -26,7 +27,12 @@ class MonthAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MonthViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_calendar_month, parent, false)
+        val inflater = LayoutInflater.from(parent.context)
+        val view = if (isHorizontal) {
+            inflater.inflate(R.layout.item_calendar_month_horizontal, parent, false)
+        } else {
+            inflater.inflate(R.layout.item_calendar_month, parent, false)
+        }
         return MonthViewHolder(view)
     }
 
@@ -37,7 +43,7 @@ class MonthAdapter(
         holder.tvMonthName.text = "$monthName $year"
 
         holder.rvDays.layoutManager = GridLayoutManager(holder.itemView.context, 7)
-        holder.rvDays.adapter = DayAdapter(context, monthCalendar, selectedDates, selectionEnabled, showPredictions, onDateSelected)
+        holder.rvDays.adapter = DayAdapter(context, monthCalendar, selectedDates, selectionEnabled, showPredictions, isHorizontal, onDateSelected)
 
         holder.rvDays.isNestedScrollingEnabled = false
     }
