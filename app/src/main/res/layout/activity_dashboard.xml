@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context=".DashboardActivity">
+
+    <View
+        android:id="@+id/countdown_circle"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="70dp"
+        android:background="@drawable/countdown_circle"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/countdown_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="19"
+        android:textSize="80sp"
+        android:textColor="@color/black"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintTop_toTopOf="@id/countdown_circle"
+        app:layout_constraintStart_toStartOf="@id/countdown_circle"
+        app:layout_constraintEnd_toEndOf="@id/countdown_circle"
+        app:layout_constraintBottom_toTopOf="@+id/days_until_text"/>
+
+    <TextView
+        android:id="@+id/days_until_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="days until next period"
+        app:layout_constraintTop_toBottomOf="@+id/countdown_text"
+        app:layout_constraintStart_toStartOf="@id/countdown_text"
+        app:layout_constraintEnd_toEndOf="@id/countdown_text"
+        app:layout_constraintBottom_toTopOf="@+id/edit_period_button"/>
+
+    <Button
+        android:id="@+id/edit_period_button"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edit period"
+        android:textColor="@color/pink"
+        app:strokeColor="@color/pink"
+        app:layout_constraintTop_toBottomOf="@+id/days_until_text"
+        app:layout_constraintStart_toStartOf="@id/countdown_text"
+        app:layout_constraintEnd_toEndOf="@id/countdown_text"
+        app:layout_constraintBottom_toBottomOf="@id/countdown_circle"/>
+
+    <ImageView
+        android:id="@+id/prev_month_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintTop_toTopOf="@+id/month_year_text"
+        app:layout_constraintBottom_toBottomOf="@+id/month_year_text"
+        app:layout_constraintEnd_toStartOf="@+id/month_year_text"/>
+
+    <TextView
+        android:id="@+id/month_year_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="January 2026"
+        android:textColor="@color/pink"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/countdown_circle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/next_month_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_arrow_back"
+        android:rotation="180"
+        app:layout_constraintTop_toTopOf="@+id/month_year_text"
+        app:layout_constraintBottom_toBottomOf="@+id/month_year_text"
+        app:layout_constraintStart_toEndOf="@+id/month_year_text"/>
+
+    <LinearLayout
+        android:id="@+id/days_of_week_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/month_year_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="SUN" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="MON" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="TUE" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="WED" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="THU" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="FRI" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="SAT" />
+
+    </LinearLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/dashboard_calendar_view_pager"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/days_of_week_header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:menu="@menu/bottom_navigation_menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

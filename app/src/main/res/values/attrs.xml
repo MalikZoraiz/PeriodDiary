@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="HorizontalCalendarView">
+        <attr name="dayTextColor" format="color" />
+        <attr name="selectedDayTextColor" format="color" />
+        <attr name="selectedDayBackgroundColor" format="color" />
+        <attr name="predictedDayBackgroundColor" format="color" />
+        <attr name="fertileDayBackgroundColor" format="color" />
+        <attr name="ovulationDayBackgroundColor" format="color" />
+    </declare-styleable>
+</resources>
