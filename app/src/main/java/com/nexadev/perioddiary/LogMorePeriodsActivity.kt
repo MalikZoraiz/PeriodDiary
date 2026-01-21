@@ -2,6 +2,7 @@ package com.nexadev.perioddiary
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.core.content.IntentCompat // KTX for Intent extras
 import androidx.lifecycle.lifecycleScope
 import com.nexadev.perioddiary.data.database.AppDatabase
 import com.nexadev.perioddiary.data.database.PeriodEntry
@@ -22,30 +23,34 @@ class LogMorePeriodsActivity : BaseCalendarActivity() {
         binding.backArrowLogMore.setOnClickListener { finish() }
         binding.confirmButtonLogMore.isEnabled = false
 
-        val datesInMillis = intent.getLongArrayExtra("selectedDates")
-        if (datesInMillis != null) {
-            for (millis in datesInMillis) {
-                val calendar = Calendar.getInstance()
-                calendar.timeInMillis = millis
-                selectedDates.add(calendar)
-            }
+        // KTX Optimization: Unpacking the Intent extras using functional mapping
+        intent.getLongArrayExtra("selectedDates")?.forEach { millis ->
+            selectedDates.add(Calendar.getInstance().apply { timeInMillis = millis })
         }
 
-        setupCalendar(binding.monthsRecyclerViewLogMore, selectedDates, true, true, false) { date ->
+        setupCalendar(
+            recyclerView = binding.monthsRecyclerViewLogMore,
+            selectedDates = selectedDates,
+            selectionEnabled = true,
+            showPredictions = true,
+            isHorizontal = false
+        ) { date ->
             val today = Calendar.getInstance()
 
-            if (date.after(today)) {
-                return@setupCalendar
-            }
+            if (date.after(today)) return@setupCalendar
 
             val startOfPeriod = date.clone() as Calendar
             val newPeriodDates = mutableListOf<Calendar>()
-            for (i in 0 until 5) {
+
+            // KTX Optimization: Using repeat instead of for-until
+            repeat(5) {
                 val dayToAdd = startOfPeriod.clone() as Calendar
-                if (dayToAdd.after(today)) {
-                    break
-                }
-                if (selectedDates.none { it.get(Calendar.YEAR) == dayToAdd.get(Calendar.YEAR) && it.get(Calendar.DAY_OF_YEAR) == dayToAdd.get(Calendar.DAY_OF_YEAR) }) {
+                if (dayToAdd.after(today)) return@repeat
+
+                // KTX Optimization: Simplified date comparison check
+                val isAlreadySelected = selectedDates.any {it.isSameDay(dayToAdd) }
+
+                if (!isAlreadySelected) {
                     newPeriodDates.add(dayToAdd)
                 }
                 startOfPeriod.add(Calendar.DAY_OF_MONTH, 1)
@@ -60,13 +65,25 @@ class LogMorePeriodsActivity : BaseCalendarActivity() {
         }
 
         binding.confirmButtonLogMore.setOnClickListener {
-            lifecycleScope.launch {
-                val periodEntryDao = AppDatabase.getDatabase(applicationContext).periodEntryDao()
-                newPeriodsToSave.forEach { periodEntryDao.insertPeriodEntry(it) }
-            }
-            val intent = Intent(this, SymptomsActivity::class.java)
-            startActivity(intent)
-            finish() // Finish this activity to prevent going back to it
+            saveAndFinish()
         }
+    }
+
+    private fun saveAndFinish() {
+        lifecycleScope.launch {
+            val periodEntryDao = AppDatabase.getDatabase(applicationContext).periodEntryDao()
+            // KTX Optimization: Direct iteration for background saving
+            newPeriodsToSave.forEach { periodEntryDao.insertPeriodEntry(it) }
+        }
+
+        // KTX Optimization: Simple navigation
+        startActivity(Intent(this, SymptomsActivity::class.java))
+        finish()
+    }
+
+    // KTX Helper Extension: Keeps the logic inside setupCalendar clean
+    private fun Calendar.isSameDay(other: Calendar): Boolean {
+        return this.get(Calendar.YEAR) == other.get(Calendar.YEAR) &&
+                this.get(Calendar.DAY_OF_YEAR) == other.get(Calendar.DAY_OF_YEAR)
     }
 }

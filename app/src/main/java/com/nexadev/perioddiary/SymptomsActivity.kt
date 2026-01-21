@@ -9,7 +9,7 @@ import com.nexadev.perioddiary.databinding.ActivitySymptomsBinding
 class SymptomsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySymptomsBinding
-    private val selectedSymptoms = mutableListOf<String>()
+    private val selectedSymptoms = mutableSetOf<String>() // Using Set to avoid duplicates automatically
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,7 +19,6 @@ class SymptomsActivity : AppCompatActivity() {
         binding.backArrowSymptoms.setOnClickListener { finish() }
         binding.confirmButtonSymptoms.isEnabled = false
 
-        // Explicitly declare the type of the map to be Map<View, String>
         val symptomViews: Map<View, String> = mapOf(
             binding.symptomCramps to "Abdominal cramps",
             binding.symptomHeadache to "Headache",
@@ -35,43 +34,44 @@ class SymptomsActivity : AppCompatActivity() {
             }
         }
 
-        // Navigation
-        binding.skipButtonSymptoms.setOnClickListener {
-            startActivity(Intent(this, YouAreNotAloneActivity::class.java))
-        }
-
-        binding.confirmButtonSymptoms.setOnClickListener {
-            // You can save the selectedSymptoms list here before navigating
-            startActivity(Intent(this, YouAreNotAloneActivity::class.java))
-        }
+        // KTX/Kotlin: Simplified navigation using scope functions
+        binding.skipButtonSymptoms.setOnClickListener { navigateNext() }
+        binding.confirmButtonSymptoms.setOnClickListener { navigateNext() }
     }
 
     private fun handleSymptomSelection(selectedView: View, selectedName: String, allViews: Map<View, String>) {
-        if (selectedName == "No symptoms") {
-            // If "No symptoms" is selected, deselect all others
-            if (!selectedView.isSelected) {
-                allViews.keys.forEach { it.isSelected = false }
-                selectedSymptoms.clear()
-                selectedView.isSelected = true
-                selectedSymptoms.add(selectedName)
-            }
+        val noSymptomsKey = "No symptoms"
+
+        if (selectedName == noSymptomsKey) {
+            // Logic: If user clicks "No Symptoms", clear everything else
+            allViews.keys.forEach { it.isSelected = false }
+            selectedSymptoms.clear()
+
+            selectedView.isSelected = true
+            selectedSymptoms.add(selectedName)
         } else {
-            // If any other symptom is selected, deselect "No symptoms"
-            val noSymptomsView = allViews.entries.find { it.value == "No symptoms" }?.key
-            if (noSymptomsView?.isSelected == true) {
-                noSymptomsView.isSelected = false
-                selectedSymptoms.remove("No symptoms")
+            // Logic: If user clicks a specific symptom, unselect "No Symptoms"
+            allViews.filter { it.value == noSymptomsKey }.keys.forEach {
+                it.isSelected = false
             }
-            // Toggle the current selection
+            selectedSymptoms.remove(noSymptomsKey)
+
+            // Toggle selection state
             selectedView.isSelected = !selectedView.isSelected
             if (selectedView.isSelected) {
-                if (!selectedSymptoms.contains(selectedName)) {
-                    selectedSymptoms.add(selectedName)
-                }
+                selectedSymptoms.add(selectedName)
             } else {
                 selectedSymptoms.remove(selectedName)
             }
         }
+
+        // KTX Optimization: Button is enabled if list isn't empty
         binding.confirmButtonSymptoms.isEnabled = selectedSymptoms.isNotEmpty()
+    }
+
+    private fun navigateNext() {
+        // You could save selectedSymptoms to Database/SharedPreferences here
+        startActivity(Intent(this, YouAreNotAloneActivity::class.java))
+        finish()
     }
 }

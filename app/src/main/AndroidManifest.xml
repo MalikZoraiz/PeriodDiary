@@ -68,6 +68,9 @@
         <activity
             android:name=".LoginActivity"
             android:exported="false" />
+        <activity
+            android:name=".EditPeriodActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

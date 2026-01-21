@@ -3,20 +3,16 @@ package com.nexadev.perioddiary
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.view.children // KTX for ViewGroups
 import com.google.android.material.card.MaterialCardView
 import com.nexadev.perioddiary.databinding.ActivityGoalBinding
-import com.nexadev.perioddiary.R
 import android.widget.RadioButton
 
 class GoalActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityGoalBinding
     private var selectedGoalCardId: Int = -1
-
-    // Extension function to convert DP to PX for stroke width
-    private fun Int.dpToPx(): Int {
-        return (this * resources.displayMetrics.density).toInt()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,19 +40,19 @@ class GoalActivity : AppCompatActivity() {
         )
 
         fun selectOption(selectedCard: MaterialCardView, selectedRb: RadioButton) {
-            // Reset all other cards and radio buttons
+            // KTX Optimization: Using forEach on map values directly
             goals.values.forEach { (card, rb) ->
-                card.strokeWidth = 1.dpToPx()
+                // KTX allows using resources more fluently
+                card.strokeWidth = resources.getDimensionPixelSize(R.dimen.thin_stroke)
                 rb.isChecked = false
             }
 
-            // Highlight the selected card and check its radio button
-            selectedCard.strokeWidth = 2.dpToPx()
+            selectedCard.strokeWidth = resources.getDimensionPixelSize(R.dimen.thick_stroke)
             selectedRb.isChecked = true
             selectedGoalCardId = selectedCard.id
 
-            // Enable confirm button only if "Cycle Tracking" is the selected goal
-            binding.confirmButtonGoal.isEnabled = selectedGoalCardId == R.id.card_cycle_tracking
+            // Enable button logic
+            binding.confirmButtonGoal.isEnabled = (selectedGoalCardId == R.id.card_cycle_tracking)
         }
 
         goals.forEach { (container, pair) ->

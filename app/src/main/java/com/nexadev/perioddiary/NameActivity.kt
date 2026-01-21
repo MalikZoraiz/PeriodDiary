@@ -2,9 +2,8 @@ package com.nexadev.perioddiary
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.doOnTextChanged // KTX Extension
 import androidx.lifecycle.lifecycleScope
 import com.nexadev.perioddiary.data.database.AppDatabase
 import com.nexadev.perioddiary.data.database.User
@@ -22,15 +21,10 @@ class NameActivity : AppCompatActivity() {
 
         binding.confirmButton.isEnabled = false
 
-        binding.firstNameEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                binding.confirmButton.isEnabled = !s.isNullOrEmpty()
-            }
-
-            override fun afterTextChanged(s: Editable?) {}
-        })
+        // KTX RULE: Replace 'addTextChangedListener' with 'doOnTextChanged'
+        binding.firstNameEditText.doOnTextChanged { text, _, _, _ ->
+            binding.confirmButton.isEnabled = !text.isNullOrEmpty()
+        }
 
         binding.confirmButton.setOnClickListener {
             val name = binding.firstNameEditText.text.toString()
@@ -40,15 +34,21 @@ class NameActivity : AppCompatActivity() {
                     userDao.insertUser(User(name = name))
                 }
             }
-            startActivity(Intent(this, GoalActivity::class.java))
+            navigateToGoal()
         }
 
         binding.skipButton.setOnClickListener {
-            startActivity(Intent(this, GoalActivity::class.java))
+            navigateToGoal()
         }
 
         binding.backArrow.setOnClickListener {
             finish()
         }
+    }
+
+    // Helper function to avoid code duplication
+    private fun navigateToGoal() {
+        val intent = Intent(this, GoalActivity::class.java)
+        startActivity(intent)
     }
 }

@@ -2,6 +2,8 @@ package com.nexadev.perioddiary
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,13 +25,53 @@ class DashboardActivity : AppCompatActivity() {
     private val months = mutableListOf<Calendar>()
     private val snapHelper = PagerSnapHelper()
 
+    private val editPeriodResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            // Relaunch the scope to refresh the data smoothly without recreating the whole activity
+            months.clear()
+            loadDataAndSetupUI()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        loadDataAndSetupUI()
+
+        binding.editPeriodButton.setOnClickListener {
+            val intent = Intent(this, EditPeriodActivity::class.java)
+            editPeriodResultLauncher.launch(intent)
+        }
+
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_settings -> {
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun loadDataAndSetupUI() {
         lifecycleScope.launch {
             val periodEntries = AppDatabase.getDatabase(applicationContext).periodEntryDao().getAllPeriodEntriesList()
+
+            // --- Calendar Date Range & Empty State UI ---
+            val startCalendar: Calendar
+            if (periodEntries.isEmpty()) {
+                binding.countdownText.text = ""
+                binding.daysUntilText.visibility = View.GONE
+                startCalendar = Calendar.getInstance().apply { set(2024, Calendar.JANUARY, 1) }
+            } else {
+                binding.daysUntilText.visibility = View.VISIBLE
+                startCalendar = periodEntries.minByOrNull { it.startDate.timeInMillis }!!.startDate.clone() as Calendar
+            }
+            startCalendar.set(Calendar.DAY_OF_MONTH, 1)
+
             val loggedPeriodDates = periodEntries.flatMap {
                 val dates = mutableListOf<Calendar>()
                 val current = it.startDate.clone() as Calendar
@@ -40,43 +82,38 @@ class DashboardActivity : AppCompatActivity() {
                 dates
             }
 
-            // --- Prediction and Fertile Window Logic ---
+            // --- Prediction, Fertile Window, and Countdown Logic ---
             val allPeriodDates = loggedPeriodDates.toMutableList()
             val fertileDates = mutableListOf<Calendar>()
             val ovulationDates = mutableListOf<Calendar>()
 
             if (periodEntries.isNotEmpty()) {
-                val lastPeriod = periodEntries.first() // most recent one
+                val lastPeriod = periodEntries.first()
                 val cycleLength = 28
                 val periodLength = 5
 
-                // Predict next 6 periods
                 var nextPeriodStart = lastPeriod.startDate.clone() as Calendar
                 for (i in 0 until 6) {
                     nextPeriodStart.add(Calendar.DAY_OF_MONTH, cycleLength)
-                    val predictedPeriod = mutableListOf<Calendar>()
                     for (j in 0 until periodLength) {
                         val predictedDate = nextPeriodStart.clone() as Calendar
                         predictedDate.add(Calendar.DAY_OF_MONTH, j)
-                        predictedPeriod.add(predictedDate)
+                        allPeriodDates.add(predictedDate)
                     }
-                    allPeriodDates.addAll(predictedPeriod)
                 }
 
-                // Calculate fertile window and ovulation for the next cycle
                 val nextCycleStart = lastPeriod.startDate.clone() as Calendar
                 nextCycleStart.add(Calendar.DAY_OF_MONTH, cycleLength)
                 val ovulationDay = nextCycleStart.clone() as Calendar
                 ovulationDay.add(Calendar.DAY_OF_MONTH, -14)
                 ovulationDates.add(ovulationDay)
 
-                for (i in -3..2) { // Fertile window is typically 6 days
+                for (i in -3..2) {
                     val fertileDay = ovulationDay.clone() as Calendar
                     fertileDay.add(Calendar.DAY_OF_MONTH, i)
                     fertileDates.add(fertileDay)
                 }
 
-                // --- Countdown Logic ---
                 val today = Calendar.getInstance()
                 val currentPeriod = periodEntries.find { today.after(it.startDate) && today.before(it.endDate) || today.isSameDay(it.startDate) || today.isSameDay(it.endDate) }
 
@@ -101,12 +138,7 @@ class DashboardActivity : AppCompatActivity() {
             }
 
             // --- Calendar Setup ---
-            val earliestLoggedMonth = periodEntries.minByOrNull { it.startDate.timeInMillis }?.startDate
-            val startCalendar = earliestLoggedMonth ?: Calendar.getInstance()
-            startCalendar.set(Calendar.DAY_OF_MONTH, 1)
-
             val endCalendar = Calendar.getInstance().apply { set(2030, Calendar.DECEMBER, 31) }
-
             val current = startCalendar.clone() as Calendar
             while (current.before(endCalendar)) {
                 months.add(current.clone() as Calendar)
@@ -116,10 +148,10 @@ class DashboardActivity : AppCompatActivity() {
             monthAdapter = DashboardMonthAdapter(this@DashboardActivity, months, loggedPeriodDates, allPeriodDates, fertileDates, ovulationDates)
             binding.dashboardCalendarRecyclerView.adapter = monthAdapter
             binding.dashboardCalendarRecyclerView.layoutManager = LinearLayoutManager(this@DashboardActivity, LinearLayoutManager.HORIZONTAL, false)
-            snapHelper.attachToRecyclerView(binding.dashboardCalendarRecyclerView)
+            if (binding.dashboardCalendarRecyclerView.onFlingListener == null) {
+                snapHelper.attachToRecyclerView(binding.dashboardCalendarRecyclerView)
+            }
 
-
-            // Scroll to the current month
             val currentMonthIndex = months.indexOfFirst { it.isSameMonth(Calendar.getInstance()) }
             if (currentMonthIndex != -1) {
                 (binding.dashboardCalendarRecyclerView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(currentMonthIndex, 0)
@@ -127,16 +159,6 @@ class DashboardActivity : AppCompatActivity() {
             }
 
             setupNavigation()
-        }
-
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
-                    true
-                }
-                else -> false
-            }
         }
     }
 

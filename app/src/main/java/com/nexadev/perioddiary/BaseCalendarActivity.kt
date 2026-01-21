@@ -13,11 +13,19 @@ abstract class BaseCalendarActivity : AppCompatActivity() {
         selectedDates: List<Calendar>,
         selectionEnabled: Boolean,
         showPredictions: Boolean,
-        isHorizontal: Boolean, // This flag is now correctly used
-        onDateSelected: (Calendar) -> Unit
+        isHorizontal: Boolean,
+        startYear: Int? = null, // This is now an optional parameter
+        startMonth: Int? = null, // This is now an optional parameter
+        onDateSelected: (Calendar) -> Unit // The lambda MUST be the last parameter
     ) {
         val months = mutableListOf<Calendar>()
-        val startCalendar = Calendar.getInstance().apply { set(2000, Calendar.JANUARY, 1) }
+        val startCalendar = Calendar.getInstance().apply {
+            if (startYear != null && startMonth != null) {
+                set(startYear, startMonth, 1)
+            } else {
+                set(2000, Calendar.JANUARY, 1)
+            }
+        }
         val endCalendar = Calendar.getInstance().apply { add(Calendar.MONTH, 1) }
 
         val calendar = startCalendar.clone() as Calendar
@@ -27,7 +35,7 @@ abstract class BaseCalendarActivity : AppCompatActivity() {
         }
 
         val adapter = MonthAdapter(this, months, selectedDates, selectionEnabled, showPredictions, isHorizontal, onDateSelected)
-        
+
         val layoutManager = if (isHorizontal) {
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         } else {
