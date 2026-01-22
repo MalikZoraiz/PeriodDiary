@@ -23,7 +23,7 @@ abstract class BaseCalendarActivity : AppCompatActivity() {
             if (startYear != null && startMonth != null) {
                 set(startYear, startMonth, 1)
             } else {
-                set(2000, Calendar.JANUARY, 1)
+                set(2018, Calendar.JANUARY, 1)
             }
         }
         val endCalendar = Calendar.getInstance().apply { add(Calendar.MONTH, 1) }

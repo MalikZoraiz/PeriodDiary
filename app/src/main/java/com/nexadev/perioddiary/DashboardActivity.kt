@@ -9,6 +9,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.tabs.TabLayoutMediator
+import com.nexadev.perioddiary.adapter.CycleInfo
+import com.nexadev.perioddiary.adapter.CycleInfoAdapter
 import com.nexadev.perioddiary.adapter.DashboardMonthAdapter
 import com.nexadev.perioddiary.data.database.AppDatabase
 import com.nexadev.perioddiary.databinding.ActivityDashboardBinding
@@ -27,7 +30,6 @@ class DashboardActivity : AppCompatActivity() {
 
     private val editPeriodResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
-            // Relaunch the scope to refresh the data smoothly without recreating the whole activity
             months.clear()
             loadDataAndSetupUI()
         }
@@ -63,11 +65,12 @@ class DashboardActivity : AppCompatActivity() {
             // --- Calendar Date Range & Empty State UI ---
             val startCalendar: Calendar
             if (periodEntries.isEmpty()) {
-                binding.countdownText.text = ""
-                binding.daysUntilText.visibility = View.GONE
-                startCalendar = Calendar.getInstance().apply { set(2024, Calendar.JANUARY, 1) }
+                binding.cycleInfoViewPager.visibility = View.GONE
+                binding.cycleInfoDots.visibility = View.GONE
+                startCalendar = Calendar.getInstance().apply { set(2020, Calendar.JANUARY, 1) }
             } else {
-                binding.daysUntilText.visibility = View.VISIBLE
+                binding.cycleInfoViewPager.visibility = View.VISIBLE
+                binding.cycleInfoDots.visibility = View.VISIBLE
                 startCalendar = periodEntries.minByOrNull { it.startDate.timeInMillis }!!.startDate.clone() as Calendar
             }
             startCalendar.set(Calendar.DAY_OF_MONTH, 1)
@@ -86,6 +89,8 @@ class DashboardActivity : AppCompatActivity() {
             val allPeriodDates = loggedPeriodDates.toMutableList()
             val fertileDates = mutableListOf<Calendar>()
             val ovulationDates = mutableListOf<Calendar>()
+            var cycleDay = ""
+            var daysUntil = ""
 
             if (periodEntries.isNotEmpty()) {
                 val lastPeriod = periodEntries.first()
@@ -119,8 +124,8 @@ class DashboardActivity : AppCompatActivity() {
 
                 if (currentPeriod != null) {
                     val dayOfPeriod = TimeUnit.MILLISECONDS.toDays(today.timeInMillis - currentPeriod.startDate.timeInMillis) + 1
-                    binding.countdownText.text = dayOfPeriod.toString()
-                    binding.daysUntilText.text = when (dayOfPeriod.toInt()) {
+                    daysUntil = dayOfPeriod.toString()
+                    cycleDay = when (dayOfPeriod.toInt()) {
                         1 -> "st day of period"
                         2 -> "nd day of period"
                         3 -> "rd day of period"
@@ -131,11 +136,26 @@ class DashboardActivity : AppCompatActivity() {
                     if (nextUpcomingPeriod != null) {
                         val diff = nextUpcomingPeriod.timeInMillis - today.timeInMillis
                         val days = TimeUnit.MILLISECONDS.toDays(diff)
-                        binding.countdownText.text = days.toString()
-                        binding.daysUntilText.text = "days until next period"
+                        daysUntil = days.toString()
                     }
                 }
+
+                val cycleStart = periodEntries.first().startDate
+                val diff = today.timeInMillis - cycleStart.timeInMillis
+                cycleDay = "Day ${TimeUnit.MILLISECONDS.toDays(diff) + 1} of $cycleLength"
             }
+            
+            val cycleInfoItems = mutableListOf<CycleInfo>()
+            if (daysUntil.isNotEmpty()) {
+                 cycleInfoItems.add(CycleInfo(daysUntil, "days until next period"))
+            }
+            if(cycleDay.isNotEmpty()) {
+                cycleInfoItems.add(CycleInfo(cycleDay.split(" ").first(), cycleDay.substringAfter(" ")))
+            }
+
+            binding.cycleInfoViewPager.adapter = CycleInfoAdapter(cycleInfoItems)
+            TabLayoutMediator(binding.cycleInfoDots, binding.cycleInfoViewPager) { _, _ -> }.attach()
+
 
             // --- Calendar Setup ---
             val endCalendar = Calendar.getInstance().apply { set(2030, Calendar.DECEMBER, 31) }
