@@ -9,36 +9,24 @@
 
     <View
         android:id="@+id/countdown_circle"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_marginTop="64dp"
+        android:layout_width="330dp"
+        android:layout_height="330dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/countdown_circle"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <TextView
-        android:id="@+id/countdown_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="19"
-        android:textSize="80sp"
-        android:textColor="@color/black"
-        app:layout_constraintVertical_chainStyle="packed"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/cycle_info_view_pager"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintTop_toTopOf="@id/countdown_circle"
         app:layout_constraintStart_toStartOf="@id/countdown_circle"
         app:layout_constraintEnd_toEndOf="@id/countdown_circle"
-        app:layout_constraintBottom_toTopOf="@+id/days_until_text"/>
-
-    <TextView
-        android:id="@+id/days_until_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="days until next period"
-        app:layout_constraintTop_toBottomOf="@+id/countdown_text"
-        app:layout_constraintStart_toStartOf="@id/countdown_text"
-        app:layout_constraintEnd_toEndOf="@id/countdown_text"
-        app:layout_constraintBottom_toTopOf="@+id/edit_period_button"/>
+        app:layout_constraintBottom_toTopOf="@+id/edit_period_button" />
 
     <Button
         android:id="@+id/edit_period_button"
@@ -48,10 +36,25 @@
         android:text="Edit period"
         android:textColor="@color/pink"
         app:strokeColor="@color/pink"
-        app:layout_constraintTop_toBottomOf="@+id/days_until_text"
-        app:layout_constraintStart_toStartOf="@id/countdown_text"
-        app:layout_constraintEnd_toEndOf="@id/countdown_text"
-        app:layout_constraintBottom_toBottomOf="@id/countdown_circle"/>
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/cycle_info_dots"
+        app:layout_constraintStart_toStartOf="@id/countdown_circle"
+        app:layout_constraintEnd_toEndOf="@id/countdown_circle"/>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/cycle_info_dots"
+        android:layout_width="wrap_content"
+        app:tabMinWidth="12dp"
+        app:tabPaddingStart="6dp"
+        app:tabPaddingEnd="6dp"
+        android:layout_height="12dp"
+        android:layout_marginBottom="24dp"
+        app:tabBackground="@drawable/tab_selector"
+        app:tabGravity="center"
+        app:tabIndicatorHeight="0dp"
+        app:layout_constraintStart_toStartOf="@id/countdown_circle"
+        app:layout_constraintEnd_toEndOf="@id/countdown_circle"
+        app:layout_constraintBottom_toBottomOf="@+id/countdown_circle"/>
 
     <ImageView
         android:id="@+id/prev_month_button"
@@ -90,10 +93,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintTop_toBottomOf="@+id/month_year_text"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="SUN" />
         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="MON" />
@@ -109,6 +114,7 @@
         android:id="@+id/dashboard_calendar_recycler_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginTop="0dp"
         app:layout_constraintTop_toBottomOf="@+id/days_of_week_header"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
