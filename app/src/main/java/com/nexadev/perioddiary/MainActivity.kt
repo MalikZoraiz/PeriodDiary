@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val sharedPref = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         val isOnboardingComplete = sharedPref.getBoolean("onboarding_complete", false)
 
         if (isOnboardingComplete) {
@@ -21,6 +21,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
             return
+        }
+
+        // Set the flag here to ensure it's always set when moving to the dashboard
+        with(sharedPref.edit()) {
+            putBoolean("onboarding_complete", true)
+            apply()
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -32,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.signInText.setOnClickListener {
-            val intent = Intent(this, SignInActivity::class.java)
+            val intent = Intent(this, RestoreDataActivity::class.java)
             startActivity(intent)
         }
     }

@@ -9,7 +9,7 @@ import com.nexadev.perioddiary.databinding.ActivitySymptomsBinding
 class SymptomsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySymptomsBinding
-    private val selectedSymptoms = mutableSetOf<String>() // Using Set to avoid duplicates automatically
+    private val selectedSymptoms = mutableSetOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +34,6 @@ class SymptomsActivity : AppCompatActivity() {
             }
         }
 
-        // KTX/Kotlin: Simplified navigation using scope functions
         binding.skipButtonSymptoms.setOnClickListener { navigateNext() }
         binding.confirmButtonSymptoms.setOnClickListener { navigateNext() }
     }
@@ -43,20 +42,16 @@ class SymptomsActivity : AppCompatActivity() {
         val noSymptomsKey = "No symptoms"
 
         if (selectedName == noSymptomsKey) {
-            // Logic: If user clicks "No Symptoms", clear everything else
             allViews.keys.forEach { it.isSelected = false }
             selectedSymptoms.clear()
-
             selectedView.isSelected = true
             selectedSymptoms.add(selectedName)
         } else {
-            // Logic: If user clicks a specific symptom, unselect "No Symptoms"
             allViews.filter { it.value == noSymptomsKey }.keys.forEach {
                 it.isSelected = false
             }
             selectedSymptoms.remove(noSymptomsKey)
 
-            // Toggle selection state
             selectedView.isSelected = !selectedView.isSelected
             if (selectedView.isSelected) {
                 selectedSymptoms.add(selectedName)
@@ -65,12 +60,10 @@ class SymptomsActivity : AppCompatActivity() {
             }
         }
 
-        // KTX Optimization: Button is enabled if list isn't empty
         binding.confirmButtonSymptoms.isEnabled = selectedSymptoms.isNotEmpty()
     }
 
     private fun navigateNext() {
-        // You could save selectedSymptoms to Database/SharedPreferences here
         startActivity(Intent(this, YouAreNotAloneActivity::class.java))
         finish()
     }

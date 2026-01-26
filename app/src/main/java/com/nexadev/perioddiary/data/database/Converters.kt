@@ -1,20 +1,16 @@
 package com.nexadev.perioddiary.data.database
 
 import androidx.room.TypeConverter
-import java.util.Calendar
+import java.util.Date
 
 class Converters {
     @TypeConverter
-    fun fromTimestamp(value: Long?): Calendar? {
-        return value?.let { 
-            val cal = Calendar.getInstance()
-            cal.timeInMillis = it
-            cal
-        }
+    fun fromTimestamp(value: Long?): Date? {
+        return value?.let { Date(it) }
     }
 
     @TypeConverter
-    fun dateToTimestamp(calendar: Calendar?): Long? {
-        return calendar?.timeInMillis
+    fun dateToTimestamp(date: Date?): Long? {
+        return date?.time
     }
 }

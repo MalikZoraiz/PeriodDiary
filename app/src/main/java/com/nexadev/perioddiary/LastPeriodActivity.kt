@@ -2,10 +2,12 @@ package com.nexadev.perioddiary
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.contentValuesOf
-import androidx.core.os.bundleOf // KTX for bundles
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.nexadev.perioddiary.data.database.AppDatabase
 import com.nexadev.perioddiary.data.database.PeriodEntry
 import com.nexadev.perioddiary.databinding.ActivityLastPeriodBinding
@@ -25,10 +27,9 @@ class LastPeriodActivity : BaseCalendarActivity() {
         binding.confirmButtonLastPeriod.isEnabled = false
 
         binding.notSureButton.setOnClickListener {
-            // Navigate to the SymptomsActivity, skipping the LogMorePeriodsActivity
             val intent = Intent(this, SymptomsActivity::class.java)
             startActivity(intent)
-            finish() // Finish this activity to prevent going back to it
+            finish()
         }
 
         setupCalendar(
@@ -45,7 +46,6 @@ class LastPeriodActivity : BaseCalendarActivity() {
             selectedDates.clear()
             val startOfPeriod = date.clone() as Calendar
 
-            // KTX/Kotlin logic: Using 'repeat' instead of standard 'for' loops
             repeat(5) {
                 val dayToAdd = startOfPeriod.clone() as Calendar
                 if (dayToAdd.after(today)) return@repeat
@@ -64,21 +64,41 @@ class LastPeriodActivity : BaseCalendarActivity() {
     }
 
     private fun saveAndNavigate() {
-        if (selectedDates.isNotEmpty()) {
-            lifecycleScope.launch {
-                val periodEntryDao = AppDatabase.getDatabase(applicationContext).periodEntryDao()
-                val startDate = selectedDates.first()
-                val endDate = selectedDates.last()
-                periodEntryDao.insertPeriodEntry(PeriodEntry(startDate = startDate, endDate = endDate))
-            }
-        }
+        lifecycleScope.launch {
+            // Always save to local database
+            val periodEntries = selectedDates.map { PeriodEntry(date = it.time, type = "PERIOD_DAY") }
+            AppDatabase.getDatabase(applicationContext).periodEntryDao().insertAll(periodEntries)
 
-        // KTX Optimization: Using Intent constructor more cleanly
-        val datesInMillis = selectedDates.map { it.timeInMillis }.toLongArray()
-        val intent = Intent(this, LogMorePeriodsActivity::class.java).apply {
-            putExtra("selectedDates", datesInMillis)
+            // If user is logged in, also sync to Firebase
+            val auth = Firebase.auth
+            val user = auth.currentUser
+            if (user != null) {
+                val db = Firebase.firestore
+                val userId = user.uid
+                val batch = db.batch()
+
+                periodEntries.forEach { entry ->
+                    val docRef = db.collection("users").document(userId).collection("period_entries").document(entry.date.time.toString())
+                    batch.set(docRef, entry)
+                }
+
+                batch.commit()
+                    .addOnSuccessListener {
+                        Log.d("LastPeriodActivity", "Initial period data successfully synced to Firestore.")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w("LastPeriodActivity", "Error syncing initial period data to Firestore", e)
+                        Toast.makeText(applicationContext, "Cloud sync failed. Your data is saved locally.", Toast.LENGTH_LONG).show()
+                    }
+            }
+
+            // Navigate to the next screen
+            val datesInMillis = selectedDates.map { it.timeInMillis }.toLongArray()
+            val intent = Intent(this@LastPeriodActivity, LogMorePeriodsActivity::class.java).apply {
+                putExtra("selectedDates", datesInMillis)
+            }
+            startActivity(intent)
+            finish()
         }
-        startActivity(intent)
-        finish()
     }
 }

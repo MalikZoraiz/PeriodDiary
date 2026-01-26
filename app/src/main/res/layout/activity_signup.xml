@@ -8,7 +8,7 @@
     android:padding="24dp">
 
     <ImageView
-        android:id="@+id/login_close_button"
+        android:id="@+id/signup_close_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_close"
@@ -16,48 +16,48 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/login_title"
+        android:id="@+id/signup_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Log in"
+        android:text="Sign up"
         android:textColor="@android:color/black"
         android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_close_button" />
+        app:layout_constraintTop_toBottomOf="@+id/signup_close_button" />
 
     <TextView
-        android:id="@+id/login_subtitle"
+        android:id="@+id/signup_subtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Log in to your account to create a backup or restore your existing data"
+        android:text="Create an account to back up your data and restore it anytime."
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_title" />
+        app:layout_constraintTop_toBottomOf="@+id/signup_title" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/login_email_layout"
+        android:id="@+id/signup_email_layout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:hint="Backup email"
+        android:hint="Email"
         app:startIconDrawable="@drawable/ic_email"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_subtitle">
+        app:layout_constraintTop_toBottomOf="@id/signup_subtitle">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/login_email_edit_text"
+            android:id="@+id/signup_email_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/login_password_layout"
+        android:id="@+id/signup_password_layout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -67,67 +67,57 @@
         app:startIconDrawable="@drawable/ic_lock"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_email_layout">
+        app:layout_constraintTop_toBottomOf="@+id/signup_email_layout">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/login_password_edit_text"
+            android:id="@+id/signup_password_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:id="@+id/forgot_password_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Forgot? Tap here"
-        android:textColor="@color/pink"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_password_layout" />
-
     <LinearLayout
-        android:id="@+id/sign_up_prompt"
+        android:id="@+id/login_prompt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/forgot_password_text">
+        app:layout_constraintTop_toBottomOf="@+id/signup_password_layout">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Don't have an account? " />
+            android:text="Already have an account? " />
 
         <TextView
-            android:id="@+id/sign_up_link"
+            android:id="@+id/login_link"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sign up"
+            android:text="Log in"
             android:textColor="@color/pink"
             android:textStyle="bold" />
     </LinearLayout>
 
     <Button
-        android:id="@+id/login_cancel_button"
+        android:id="@+id/signup_cancel_button"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:text="Cancel"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/login_done_button"
+        app:layout_constraintEnd_toStartOf="@+id/signup_done_button"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/login_done_button"
+        android:id="@+id/signup_done_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="Done"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/login_cancel_button" />
+        app:layout_constraintStart_toEndOf="@id/signup_cancel_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

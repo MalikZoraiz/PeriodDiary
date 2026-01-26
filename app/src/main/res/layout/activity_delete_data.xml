@@ -20,7 +20,7 @@
 
     <Button
         android:id="@+id/delete_data_button"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -30,9 +30,10 @@
         android:textColor="@android:color/holo_red_light"
         android:textSize="18sp"
         android:textStyle="bold"
+        app:strokeColor="@android:color/holo_red_light"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/back_arrow_delete_data" />
+        app:layout_constraintTop_toBottomOf="@id/back_arrow_delete_data" />
 
     <TextView
         android:id="@+id/delete_data_subtitle"
@@ -46,5 +47,34 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/delete_data_button" />
+
+    <Button
+        android:id="@+id/delete_account_permanently_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
+        android:backgroundTint="@android:color/holo_red_dark"
+        android:text="Delete Account &amp; Data Permanently"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/delete_account_subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center"
+        android:text="This will permanently delete your account and cannot be undone."
+        android:textColor="@android:color/black"
+        app:layout_constraintBottom_toTopOf="@id/delete_account_permanently_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,9 +1,14 @@
 package com.nexadev.perioddiary
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.core.content.IntentCompat // KTX for Intent extras
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.nexadev.perioddiary.data.database.AppDatabase
 import com.nexadev.perioddiary.data.database.PeriodEntry
 import com.nexadev.perioddiary.databinding.ActivityLogMorePeriodsBinding
@@ -23,7 +28,6 @@ class LogMorePeriodsActivity : BaseCalendarActivity() {
         binding.backArrowLogMore.setOnClickListener { finish() }
         binding.confirmButtonLogMore.isEnabled = false
 
-        // KTX Optimization: Unpacking the Intent extras using functional mapping
         intent.getLongArrayExtra("selectedDates")?.forEach { millis ->
             selectedDates.add(Calendar.getInstance().apply { timeInMillis = millis })
         }
@@ -32,7 +36,7 @@ class LogMorePeriodsActivity : BaseCalendarActivity() {
             recyclerView = binding.monthsRecyclerViewLogMore,
             selectedDates = selectedDates,
             selectionEnabled = true,
-            showPredictions = true,
+            showPredictions = true, // We can show predictions here
             isHorizontal = false
         ) { date ->
             val today = Calendar.getInstance()
@@ -42,12 +46,10 @@ class LogMorePeriodsActivity : BaseCalendarActivity() {
             val startOfPeriod = date.clone() as Calendar
             val newPeriodDates = mutableListOf<Calendar>()
 
-            // KTX Optimization: Using repeat instead of for-until
             repeat(5) {
                 val dayToAdd = startOfPeriod.clone() as Calendar
                 if (dayToAdd.after(today)) return@repeat
 
-                // KTX Optimization: Simplified date comparison check
                 val isAlreadySelected = selectedDates.any {it.isSameDay(dayToAdd) }
 
                 if (!isAlreadySelected) {
@@ -58,7 +60,12 @@ class LogMorePeriodsActivity : BaseCalendarActivity() {
 
             if (newPeriodDates.isNotEmpty()) {
                 selectedDates.addAll(newPeriodDates)
-                newPeriodsToSave.add(PeriodEntry(startDate = newPeriodDates.first(), endDate = newPeriodDates.last()))
+
+                val entriesToAdd = newPeriodDates.map {
+                    PeriodEntry(date = it.time, type = "PERIOD_DAY")
+                }
+                newPeriodsToSave.addAll(entriesToAdd)
+                
                 binding.monthsRecyclerViewLogMore.adapter?.notifyDataSetChanged()
                 binding.confirmButtonLogMore.isEnabled = true
             }
@@ -71,17 +78,48 @@ class LogMorePeriodsActivity : BaseCalendarActivity() {
 
     private fun saveAndFinish() {
         lifecycleScope.launch {
-            val periodEntryDao = AppDatabase.getDatabase(applicationContext).periodEntryDao()
-            // KTX Optimization: Direct iteration for background saving
-            newPeriodsToSave.forEach { periodEntryDao.insertPeriodEntry(it) }
-        }
+            if (newPeriodsToSave.isNotEmpty()) {
+                // Always save to local database
+                val periodEntryDao = AppDatabase.getDatabase(applicationContext).periodEntryDao()
+                periodEntryDao.insertAll(newPeriodsToSave)
 
-        // KTX Optimization: Simple navigation
-        startActivity(Intent(this, SymptomsActivity::class.java))
-        finish()
+                // If user is logged in, also sync to Firebase
+                val auth = Firebase.auth
+                val user = auth.currentUser
+                if (user != null) {
+                    val db = Firebase.firestore
+                    val userId = user.uid
+                    val batch = db.batch()
+
+                    newPeriodsToSave.forEach { entry ->
+                        val docRef = db.collection("users").document(userId).collection("period_entries").document(entry.date.time.toString())
+                        batch.set(docRef, entry)
+                    }
+
+                    batch.commit()
+                        .addOnSuccessListener {
+                            Log.d("LogMorePeriodsActivity", "New period data successfully synced to Firestore.")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("LogMorePeriodsActivity", "Error syncing new period data to Firestore", e)
+                            Toast.makeText(applicationContext, "Cloud sync failed. Your data is saved locally.", Toast.LENGTH_LONG).show()
+                        }
+                }
+            }
+
+            // Mark onboarding as complete so the app starts on the dashboard next time
+            val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+            with(sharedPreferences.edit()) {
+                putBoolean("onboarding_complete", true)
+                apply()
+            }
+
+            // Navigate to the dashboard to show the final result
+            startActivity(Intent(this@LogMorePeriodsActivity, DashboardActivity::class.java))
+            finishAffinity() // Clear the onboarding stack
+        }
     }
 
-    // KTX Helper Extension: Keeps the logic inside setupCalendar clean
     private fun Calendar.isSameDay(other: Calendar): Boolean {
         return this.get(Calendar.YEAR) == other.get(Calendar.YEAR) &&
                 this.get(Calendar.DAY_OF_YEAR) == other.get(Calendar.DAY_OF_YEAR)

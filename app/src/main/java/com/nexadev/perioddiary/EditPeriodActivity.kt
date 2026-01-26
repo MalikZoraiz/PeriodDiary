@@ -8,6 +8,7 @@ import com.nexadev.perioddiary.data.database.PeriodEntry
 import com.nexadev.perioddiary.databinding.ActivityEditPeriodBinding
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.Date
 
 class EditPeriodActivity : BaseCalendarActivity() {
 
@@ -20,16 +21,14 @@ class EditPeriodActivity : BaseCalendarActivity() {
         setContentView(binding.root)
 
         lifecycleScope.launch {
-            val periodEntries = AppDatabase.getDatabase(applicationContext).periodEntryDao().getAllPeriodEntriesList()
-            val allDates = periodEntries.flatMap {
-                val dates = mutableListOf<Calendar>()
-                val current = it.startDate.clone() as Calendar
-                while (current.before(it.endDate) || current.isSameDay(it.endDate)) {
-                    dates.add(current.clone() as Calendar)
-                    current.add(Calendar.DAY_OF_MONTH, 1)
-                }
-                dates
-            }
+            // 1. Correctly get all period entries
+            val periodEntries = AppDatabase.getDatabase(applicationContext).periodEntryDao().getAllPeriodEntries()
+            
+            // 2. Convert to a list of Calendar objects (works with the new PeriodEntry class)
+            val allDates = periodEntries
+                .filter { it.type == "PERIOD_DAY" } // We only edit period days
+                .map { it.date.toCalendar() }
+            
             selectedDates.addAll(allDates)
             setupEditCalendar()
         }
@@ -51,7 +50,6 @@ class EditPeriodActivity : BaseCalendarActivity() {
             val isSelected = selectedDates.any { it.isSameDay(date) }
 
             if (isSelected) {
-                // --- Smart Deselection: Find and remove the entire contiguous block --- 
                 val datesToRemove = mutableListOf<Calendar>()
                 val processingQueue = mutableListOf(date)
                 val processed = mutableSetOf<Calendar>()
@@ -74,7 +72,6 @@ class EditPeriodActivity : BaseCalendarActivity() {
                 selectedDates.removeAll { toRemove -> datesToRemove.any { it.isSameDay(toRemove) } }
 
             } else {
-                // --- 5-Day Selection: Add a new 5-day block ---
                 val today = Calendar.getInstance()
                 if (date.after(today)) return@setupCalendar
                 
@@ -94,22 +91,16 @@ class EditPeriodActivity : BaseCalendarActivity() {
     private fun saveAndFinish() {
         lifecycleScope.launch {
             val periodEntryDao = AppDatabase.getDatabase(applicationContext).periodEntryDao()
+            
+            // 1. Delete all old period entries
             periodEntryDao.deleteAllPeriodEntries()
 
-            // Logic to group consecutive dates into period entries
-            val sortedDates = selectedDates.sortedBy { it.timeInMillis }
-            if (sortedDates.isNotEmpty()) {
-                var currentEntryStart = sortedDates.first()
-                for (i in 1 until sortedDates.size) {
-                    val diff = sortedDates[i].timeInMillis - sortedDates[i - 1].timeInMillis
-                    val days = java.util.concurrent.TimeUnit.MILLISECONDS.toDays(diff)
-                    if (days > 1) {
-                        periodEntryDao.insertPeriodEntry(PeriodEntry(startDate = currentEntryStart, endDate = sortedDates[i - 1]))
-                        currentEntryStart = sortedDates[i]
-                    }
-                }
-                periodEntryDao.insertPeriodEntry(PeriodEntry(startDate = currentEntryStart, endDate = sortedDates.last()))
+            // 2. Create new entries from the selected dates (works with the new PeriodEntry class)
+            val newPeriodEntries = selectedDates.map { 
+                PeriodEntry(date = it.time, type = "PERIOD_DAY") 
             }
+            periodEntryDao.insertAll(newPeriodEntries)
+            
             setResult(RESULT_OK) // Set the result to indicate data has changed
             finish()
         }
@@ -118,5 +109,9 @@ class EditPeriodActivity : BaseCalendarActivity() {
     private fun Calendar.isSameDay(other: Calendar): Boolean {
         return this.get(Calendar.YEAR) == other.get(Calendar.YEAR) &&
                this.get(Calendar.DAY_OF_YEAR) == other.get(Calendar.DAY_OF_YEAR)
+    }
+    
+    private fun Date.toCalendar(): Calendar {
+        return Calendar.getInstance().apply { time = this@toCalendar }
     }
 }

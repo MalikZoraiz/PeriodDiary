@@ -33,6 +33,15 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.45" />
 
+    <!-- This barrier creates a flexible line below the title, preventing overlaps -->
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/content_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:barrierMargin="24dp"
+        app:constraint_referenced_ids="app_title" />
+
     <Button
         android:id="@+id/get_started_button"
         android:layout_width="0dp"
@@ -50,7 +59,9 @@
         app:cornerRadius="100dp"
         app:layout_constraintBottom_toTopOf="@+id/sign_in_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/content_barrier"
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/sign_in_text"

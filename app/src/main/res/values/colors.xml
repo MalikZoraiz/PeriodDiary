@@ -2,6 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="pink">#F47893</color>
-    <color name="light_pink">#FFF0F3</color> <!-- Added light pink color -->
+    
+    <!-- Corrected the pink color to be a visible, vibrant pink -->
+    <color name="pink">#E91E63</color> 
+    
+    <color name="light_pink">#FFF0F3</color>
 </resources>

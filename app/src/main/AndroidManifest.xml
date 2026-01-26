@@ -42,13 +42,13 @@
             android:name=".SymptomsActivity"
             android:exported="false" />
         <activity
+            android:name=".MoodActivity"
+            android:exported="false" />
+        <activity
             android:name=".YouAreNotAloneActivity"
             android:exported="false" />
         <activity
             android:name=".FeelYourBestActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SignInActivity"
             android:exported="false" />
         <activity
             android:name=".DashboardActivity"
@@ -68,6 +68,13 @@
         <activity
             android:name=".EditPeriodActivity"
             android:exported="false" />
+        <activity
+            android:name=".RestoreDataActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SignUpActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
