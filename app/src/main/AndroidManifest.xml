@@ -42,9 +42,6 @@
             android:name=".SymptomsActivity"
             android:exported="false" />
         <activity
-            android:name=".MoodActivity"
-            android:exported="false" />
-        <activity
             android:name=".YouAreNotAloneActivity"
             android:exported="false" />
         <activity
