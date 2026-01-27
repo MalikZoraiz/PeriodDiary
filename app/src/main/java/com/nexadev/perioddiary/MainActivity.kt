@@ -23,12 +23,6 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Set the flag here to ensure it's always set when moving to the dashboard
-        with(sharedPref.edit()) {
-            putBoolean("onboarding_complete", true)
-            apply()
-        }
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
