@@ -72,7 +72,9 @@
         android:layout_marginBottom="8dp"
         android:gravity="center"
         android:text="This will permanently delete your account and cannot be undone."
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/delete_account_permanently_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

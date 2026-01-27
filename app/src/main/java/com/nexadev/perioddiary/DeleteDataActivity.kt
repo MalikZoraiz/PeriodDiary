@@ -31,27 +31,38 @@ class DeleteDataActivity : AppCompatActivity() {
         binding.backArrowDeleteData.setOnClickListener { finish() }
 
         binding.deleteDataButton.setOnClickListener {
-            lifecycleScope.launch {
-                val database = AppDatabase.getDatabase(applicationContext)
-                database.periodEntryDao().deleteAllPeriodEntries()
-
-                val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-                with(sharedPreferences.edit()) {
-                    putBoolean("onboarding_complete", false)
-                    apply()
+            AlertDialog.Builder(this)
+                .setTitle("Delete Local Data")
+                .setMessage("Are you sure you want to delete all data from this phone? This action cannot be undone.")
+                .setPositiveButton("Delete") { _, _ ->
+                    lifecycleScope.launch {
+                        deleteLocalData()
+                    }
                 }
-
-                Toast.makeText(this@DeleteDataActivity, "Local data has been deleted.", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this@DeleteDataActivity, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finishAffinity()
-            }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
 
         binding.deleteAccountPermanentlyButton.setOnClickListener {
             showReauthenticationDialog()
         }
+    }
+
+    private suspend fun deleteLocalData() {
+        val database = AppDatabase.getDatabase(applicationContext)
+        database.periodEntryDao().deleteAllPeriodEntries()
+
+        val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putBoolean("onboarding_complete", false)
+            apply()
+        }
+
+        Toast.makeText(this@DeleteDataActivity, "Local data has been deleted.", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this@DeleteDataActivity, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finishAffinity()
     }
 
     private fun showReauthenticationDialog() {
@@ -69,12 +80,10 @@ class DeleteDataActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("Confirm Account Deletion")
             .setView(dialogView)
-            .setPositiveButton("Delete Permanently") { _, _ ->
+            .setPositiveButton("Confirm Password") { _, _ ->
                 val password = passwordEditText.text.toString()
                 if (password.isNotEmpty()) {
-                    lifecycleScope.launch {
-                        reauthenticateAndDelete(user.email!!, password)
-                    }
+                    showFinalConfirmationDialog(user.email!!, password)
                 } else {
                     Toast.makeText(this, "Password is required.", Toast.LENGTH_SHORT).show()
                 }
@@ -82,6 +91,20 @@ class DeleteDataActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
+
+    private fun showFinalConfirmationDialog(email: String, password: String) {
+        AlertDialog.Builder(this)
+            .setTitle("ARE YOU ABSOLUTELY SURE?")
+            .setMessage("This will permanently delete your account and all of your data from the cloud. This action cannot be undone.")
+            .setPositiveButton("DELETE PERMANENTLY") { _, _ ->
+                lifecycleScope.launch {
+                    reauthenticateAndDelete(email, password)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
 
     private suspend fun reauthenticateAndDelete(email: String, password: String) {
         val auth = Firebase.auth

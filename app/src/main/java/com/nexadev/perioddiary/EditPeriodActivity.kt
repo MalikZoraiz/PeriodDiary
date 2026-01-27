@@ -1,12 +1,18 @@
 package com.nexadev.perioddiary
 
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.nexadev.perioddiary.data.database.AppDatabase
 import com.nexadev.perioddiary.data.database.PeriodEntry
 import com.nexadev.perioddiary.databinding.ActivityEditPeriodBinding
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.Calendar
 import java.util.Date
 
@@ -23,12 +29,12 @@ class EditPeriodActivity : BaseCalendarActivity() {
         lifecycleScope.launch {
             // 1. Correctly get all period entries
             val periodEntries = AppDatabase.getDatabase(applicationContext).periodEntryDao().getAllPeriodEntries()
-            
+
             // 2. Convert to a list of Calendar objects (works with the new PeriodEntry class)
             val allDates = periodEntries
                 .filter { it.type == "PERIOD_DAY" } // We only edit period days
                 .map { it.date.toCalendar() }
-            
+
             selectedDates.addAll(allDates)
             setupEditCalendar()
         }
@@ -74,7 +80,7 @@ class EditPeriodActivity : BaseCalendarActivity() {
             } else {
                 val today = Calendar.getInstance()
                 if (date.after(today)) return@setupCalendar
-                
+
                 for (i in 0 until 5) {
                     val dayToAdd = date.clone() as Calendar
                     dayToAdd.add(Calendar.DAY_OF_MONTH, i)
@@ -91,16 +97,49 @@ class EditPeriodActivity : BaseCalendarActivity() {
     private fun saveAndFinish() {
         lifecycleScope.launch {
             val periodEntryDao = AppDatabase.getDatabase(applicationContext).periodEntryDao()
-            
-            // 1. Delete all old period entries
+
+            // 1. Delete all old local period entries
             periodEntryDao.deleteAllPeriodEntries()
 
-            // 2. Create new entries from the selected dates (works with the new PeriodEntry class)
-            val newPeriodEntries = selectedDates.map { 
-                PeriodEntry(date = it.time, type = "PERIOD_DAY") 
+            // 2. Create new entries from the selected dates
+            val newPeriodEntries = selectedDates.map {
+                PeriodEntry(date = it.time, type = "PERIOD_DAY")
             }
             periodEntryDao.insertAll(newPeriodEntries)
-            
+
+            // 3. Sync changes to Firebase if user is logged in
+            val auth = Firebase.auth
+            val user = auth.currentUser
+            if (user != null) {
+                val db = Firebase.firestore
+                val userId = user.uid
+                val collectionRef = db.collection("users").document(userId).collection("period_entries")
+
+                try {
+                    // First, delete all existing entries in Firestore for this user
+                    val existingEntries = collectionRef.get().await()
+                    val deleteBatch = db.batch()
+                    for (document in existingEntries) {
+                        deleteBatch.delete(document.reference)
+                    }
+                    deleteBatch.commit().await()
+                    Log.d("EditPeriodActivity", "Successfully deleted old entries from Firestore.")
+
+                    // Now, upload the new set of entries
+                    val uploadBatch = db.batch()
+                    newPeriodEntries.forEach { entry ->
+                        val docRef = collectionRef.document(entry.date.time.toString())
+                        uploadBatch.set(docRef, entry)
+                    }
+                    uploadBatch.commit().await()
+                    Log.d("EditPeriodActivity", "Successfully uploaded new entries to Firestore.")
+
+                } catch (e: Exception) {
+                    Log.w("EditPeriodActivity", "Error syncing edited period data to Firestore", e)
+                    Toast.makeText(applicationContext, "Cloud sync failed. Your data is saved locally.", Toast.LENGTH_LONG).show()
+                }
+            }
+
             setResult(RESULT_OK) // Set the result to indicate data has changed
             finish()
         }
@@ -110,7 +149,7 @@ class EditPeriodActivity : BaseCalendarActivity() {
         return this.get(Calendar.YEAR) == other.get(Calendar.YEAR) &&
                this.get(Calendar.DAY_OF_YEAR) == other.get(Calendar.DAY_OF_YEAR)
     }
-    
+
     private fun Date.toCalendar(): Calendar {
         return Calendar.getInstance().apply { time = this@toCalendar }
     }

@@ -9,4 +9,7 @@ data class PeriodEntry(
     @PrimaryKey
     var date: Date = Date(),
     var type: String = ""
-)
+){
+    // Add a no-argument constructor for Firestore deserialization
+    constructor() : this(Date(), "")
+}
